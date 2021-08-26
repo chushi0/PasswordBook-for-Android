@@ -1,0 +1,46 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory app:title="@string/settings_secure_title">
+
+        <Preference
+            app:icon="@drawable/ic_baseline_auto_delete_36"
+            app:key="secure_clear"
+            app:summary="@string/settings_secure_clear_summary"
+            app:title="@string/settings_secure_clear_title" />
+
+        <SwitchPreference
+            app:defaultValue="true"
+            app:key="secure_auto_clear"
+            app:summaryOff="@string/settings_secure_auto_clear_summary_off"
+            app:summaryOn="@string/settings_secure_auto_clear_summary_on"
+            app:title="@string/settings_secure_auto_clear_title" />
+
+        <Preference
+            app:icon="@drawable/ic_baseline_autorenew_36"
+            app:key="secure_alter_password"
+            app:summary="@string/settings_secure_alter_password_summary"
+            app:title="@string/settings_secure_alter_password_title" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/settings_data_title">
+
+        <Preference
+            app:icon="@drawable/ic_baseline_import_export_36"
+            app:key="data_export"
+            app:summary="@string/settings_data_export_summary"
+            app:title="@string/settings_data_export_title" />
+
+        <Preference
+            app:key="data_import"
+            app:summary="@string/settings_data_import_summary"
+            app:title="@string/settings_data_import_title" />
+
+        <Preference
+            app:icon="@drawable/ic_baseline_close_36"
+            app:key="data_clear"
+            app:summary="@string/settings_data_clear_summary"
+            app:title="@string/settings_data_clear_title" />
+
+    </PreferenceCategory>
+</PreferenceScreen>

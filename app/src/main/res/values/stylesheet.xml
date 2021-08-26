@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="PasswordView">
+        <attr name="eyeDrawableOn" format="reference" />
+        <attr name="eyeDrawableOff" format="reference" />
+        <attr name="eyeTintColorOn" format="color" />
+        <attr name="eyeTintColorOff" format="color" />
+        <attr name="clearDrawable" format="reference" />
+        <attr name="clearTintColor" format="color" />
+    </declare-styleable>
+</resources>

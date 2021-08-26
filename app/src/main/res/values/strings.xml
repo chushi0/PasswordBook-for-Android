@@ -1,0 +1,118 @@
+<resources>
+    <string name="app_name">密码本</string>
+    <string name="text_hello_1">欢迎使用密码本！首次使用请设置密码本主密码：</string>
+    <string name="text_hello_2">密码本主密码用于控制密码本访问，并用于密码加密。请务必牢记主密码，丢失后将<b>无法访问密码本，且无法找回</b>。\n\n主密码的强度将直接决定您其他密码的安全性，请<b>务必使用至少12位，且包含大小写字母、数字及特殊符号的复杂密码</b>。密码长度不能超过50位。</string>
+    <string name="text_hello_open">开启密码本</string>
+    <string name="dialog_common_ok">确定</string>
+    <string name="dialog_common_cancel">取消</string>
+    <string name="text_wrong_password">密码错误</string>
+
+    <string name="dialog_save_before_exit_title">密码未保存</string>
+    <string name="dialog_save_before_exit_message">您的修改尚未保存，是否保存？</string>
+    <string name="dialog_save_before_exit_positive">保存</string>
+    <string name="dialog_save_before_exit_negative">不保存</string>
+
+    <string name="dialog_alter_password_title">请输入新密码</string>
+    <string name="dialog_wipe_data_title">确认清除全部数据？</string>
+    <string name="dialog_wipe_data_message">此操作将清除密码本所有数据（包括您当前主密码和所有已保存的密码，不包括导出的数据）。\n\n注意：此操作一经确认无法取消。</string>
+    <string name="dialog_wipe_data_positive">删除</string>
+
+    <string name="fail_no_main_password">未提供主密码</string>
+    <string name="fail_bad_datapack">数据包错误</string>
+    <string name="fail_no_datapack_password">未提供数据包密码</string>
+    <string name="fail_unsupport_datapack">数据包版本不支持（%1$s/%2$s）</string>
+    <string name="fail_io_write">文件写入失败</string>
+    <string name="fail_unknown">未知错误</string>
+
+    <string name="toast_activity_main_load_fail">读取数据库失败：%1$s</string>
+    <string name="toast_activity_detail_load_fail">读取详细信息失败：%1$s</string>
+    <string name="toast_activity_detail_save_fail">保存失败：%1$s</string>
+    <string name="toast_activity_detail_delete_fail">删除失败：%1$s</string>
+    <string name="toast_activity_settings_alter_password_fail">修改密码失败：%1$s</string>
+    <string name="toast_activity_settings_import_fail">导入失败：%1$s</string>
+    <string name="toast_activity_settings_export_fail">导出失败：%1$s</string>
+    <string name="toast_activity_settings_wipe_data_fail">清除数据失败：%1$s</string>
+
+    <string name="toast_activity_detail_password_copied">密码已复制到剪切板</string>
+    <string name="toast_activity_detail_saved">已保存</string>
+    <string name="toast_activity_detail_deleted">已删除</string>
+    <string name="toast_activity_settings_memory_password_wiped">已清除</string>
+    <string name="toast_activity_settings_data_wiped">已清除全部数据</string>
+    <string name="toast_activity_settings_password_altered">已修改密码</string>
+    <string name="toast_activity_settings_imported">导入成功</string>
+    <string name="toast_activity_settings_exported">数据包已导出</string>
+
+    <string name="dialog_password_main_input">请输入主密码</string>
+    <string name="dialog_password_main_no_password_title">输入密码</string>
+    <string name="dialog_password_main_no_password_message">请提供主密码，以便密码本保护您的密码。\n\n主密码与其他密码不同，若密码本数据被黑客获取，主密码将保护您的密码不会暴露给黑客。若您的主密码设置得过于简单，黑客可以借助计算机暴力破解，从而使得您的其他密码暴露给黑客。\n\n<b>我们建议您使用至少12位由大小写字母、数字及特殊符号组成的密码。</b></string>
+    <string name="dialog_password_main_too_long_title">密码太长</string>
+    <string name="dialog_password_main_too_lang_message">为保证软件稳定性，密码本主密码不能超过50位。</string>
+    <string name="dialog_password_main_too_short_title">密码太短</string>
+    <string name="dialog_password_main_too_short_message">密码太短，其他人可能会猜出您的密码。<b>请设置至少12位的密码。</b>\n\n主密码与其他密码不同，若密码本数据被黑客获取，主密码将保护您的密码不会暴露给黑客。若您的主密码设置得过于简单，黑客可以借助计算机暴力破解，从而使得您的其他密码暴露给黑客。\n\n<b>我们建议您使用至少12位由大小写字母、数字及特殊符号组成的密码。</b></string>
+    <string name="dialog_password_main_few_type_title">密码字符种类太少</string>
+    <string name="dialog_password_main_few_type_message">密码字符种类太少，其他人可能会猜出您的密码。<b>请混合使用大小写字母、数字及特殊符号。</b>\n\n主密码与其他密码不同，若密码本数据被黑客获取，主密码将保护您的密码不会暴露给黑客。若您的主密码设置得过于简单，黑客可以借助计算机暴力破解，从而使得您的其他密码暴露给黑客。\n\n<b>我们建议您使用至少12位由大小写字母、数字及特殊符号组成的密码。</b></string>
+    <string name="dialog_password_main_not_ascii_title">非标准字符</string>
+    <string name="dialog_password_main_not_ascii_message">您的密码包含ASCII字符集以外的字符或不可见字符。\n部分软件设计时并未考虑密码中包含非ASCII字符的情况，在这些软件上输入密码时，可能会得到意料之外的错误。\n此外，当您更换设备、输入法或系统语言设置时，可能无法再次输入您的密码。</string>
+    <string name="dialog_password_main_use">仍要使用</string>
+    <string name="dialog_password_main_change">换个密码</string>
+
+    <string name="dialog_password_no_password_title">输入密码</string>
+    <string name="dialog_password_no_password_message">请提供密码。</string>
+    <string name="dialog_password_no_title_title">输入标题</string>
+    <string name="dialog_password_no_title_message">请简短描述您的密码</string>
+    <string name="dialog_password_too_long_title_title">标题太长</string>
+    <string name="dialog_password_too_long_title_message">请考虑缩短标题，并将更多内容写在详细信息处。</string>
+    <string name="dialog_password_too_short_title">密码安全警告</string>
+    <string name="dialog_password_too_short_message">您的密码太短，其他人可能会猜出您的密码。<b>请设置至少12位的密码。</b></string>
+    <string name="dialog_password_few_type_title">密码安全警告</string>
+    <string name="dialog_password_few_type_message">您的密码字符种类太少，其他人可能会猜出您的密码。<b>请混合使用大小写字母、数字及特殊符号。</b></string>
+    <string name="dialog_password_not_ascii_title">非标准字符</string>
+    <string name="dialog_password_not_ascii_message">您的密码包含ASCII字符集以外的字符或不可见字符。\n部分软件设计时并未考虑密码中包含非ASCII字符的情况，在这些软件上输入密码时，可能会得到意料之外的错误。\n此外，当您更换设备、输入法或系统语言设置时，可能无法再次输入您的密码。</string>
+    <string name="dialog_password_use">仍要使用</string>
+    <string name="dialog_password_change_password">换个密码</string>
+    <string name="dialog_password_change_title">换个标题</string>
+
+    <string name="dialog_record_delete_title">真的要删除吗？</string>
+    <string name="dialog_record_delete_message">删除后，该记录将会永久消失（真的很久）！</string>
+    <string name="dialog_record_delete_ok">删除</string>
+
+    <string name="menu_settings">设置</string>
+    <string name="menu_edit_mode_view">视图模式</string>
+    <string name="menu_edit_mode_edit">编辑模式</string>
+    <string name="menu_delete">删除</string>
+    <string name="menu_commit">提交</string>
+
+    <string name="dialog_password_import">请输入导入文件密码</string>
+    <string name="dialog_password_export">设置导出数据包密码</string>
+
+    <string name="settings_secure_title">安全</string>
+    <string name="settings_secure_clear_summary">清除内存中缓存的主密码可以防止恶意软件通过读取内存来获取您的主密码。</string>
+    <string name="settings_secure_clear_title">立即清除内存中缓存的主密码</string>
+    <string name="settings_secure_auto_clear_summary_off">程序退出前不会清除内存中缓存的主密码。</string>
+    <string name="settings_secure_auto_clear_summary_on">5分钟未操作后，自动清除内存中缓存的主密码。</string>
+    <string name="settings_secure_auto_clear_title">自动清除内存中缓存的主密码</string>
+    <string name="settings_secure_alter_password_summary">如果您当前的主密码已经泄漏，应尽快修改密码。</string>
+    <string name="settings_secure_alter_password_title">修改密码</string>
+    <string name="settings_data_title">数据</string>
+    <string name="settings_data_export_summary">将密码本数据导出到外部存储空间，便于备份或在设备间转移。</string>
+    <string name="settings_data_export_title">导出数据</string>
+    <string name="settings_data_import_summary">将外部存储空间的密码本数据导入，并与当前数据合并。</string>
+    <string name="settings_data_import_title">导入数据</string>
+    <string name="settings_data_clear_summary">此操作将清除本地密码本的所有数据。</string>
+    <string name="settings_data_clear_title">清除数据</string>
+
+    <string name="processing_wipe_data">正在清除数据……</string>
+    <string name="processing_alter_password">正在更新数据库……\n在更新完成前，请勿退出或关闭手机屏幕</string>
+    <string name="processing_analyse_data">正在解析数据包……</string>
+    <string name="processing_import">正在导入数据……</string>
+    <string name="processing_export">正在导出数据……</string>
+
+    <string name="text_record_empty">没有记录，请点击右下角＋号添加新记录。</string>
+    <string name="text_title">标题</string>
+    <string name="text_account">账号</string>
+    <string name="text_password">密码</string>
+    <string name="btn_copy_password">复制密码</string>
+    <string name="text_detail">详细信息</string>
+    <string name="file_data_export">密码本导出数据.zip</string>
+
+</resources>
