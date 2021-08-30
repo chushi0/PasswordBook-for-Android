@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/key"
+        android:icon="@drawable/ic_baseline_key_24"
+        android:title="@string/menu_negative_key" />
+
+    <item
+        android:id="@+id/notes"
+        android:icon="@drawable/ic_baseline_notes_24"
+        android:title="@string/menu_negative_note" />
+
+    <item
+        android:id="@+id/explore"
+        android:icon="@drawable/ic_baseline_explore_24"
+        android:title="@string/menu_negative_explore" />
+</menu>

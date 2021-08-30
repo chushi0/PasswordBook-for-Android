@@ -176,7 +176,7 @@ public class PasswordUtils {
             return false;
         }
         try {
-            verify = Crypto.decryptStringData(Crypto.base64Decrypt(verify), key);
+            verify = Crypto.decryptData(verify, key);
         } catch (IndexOutOfBoundsException e) {
             // 密钥错误时会发生越界异常
             return false;
@@ -202,7 +202,7 @@ public class PasswordUtils {
      */
     public static Pair<String, String> encodePassword(byte[] key) {
         String uuid = UUID.randomUUID().toString();
-        String verify = Crypto.base64Encrypt(Crypto.encryptStringData(uuid, key));
+        String verify = Crypto.encryptData(uuid, key);
         return new Pair<>(uuid, verify);
     }
 }

@@ -7,7 +7,7 @@
     <string name="dialog_common_cancel">取消</string>
     <string name="text_wrong_password">密码错误</string>
 
-    <string name="dialog_save_before_exit_title">密码未保存</string>
+    <string name="dialog_save_before_exit_title">修改未保存</string>
     <string name="dialog_save_before_exit_message">您的修改尚未保存，是否保存？</string>
     <string name="dialog_save_before_exit_positive">保存</string>
     <string name="dialog_save_before_exit_negative">不保存</string>
@@ -41,6 +41,8 @@
     <string name="toast_activity_settings_password_altered">已修改密码</string>
     <string name="toast_activity_settings_imported">导入成功</string>
     <string name="toast_activity_settings_exported">数据包已导出</string>
+    <string name="toast_activity_random_password_copied">密码已复制到剪切板</string>
+    <string name="toast_activity_random_password_type_empty">请至少选择一项字符类型</string>
 
     <string name="dialog_password_main_input">请输入主密码</string>
     <string name="dialog_password_main_no_password_title">输入密码</string>
@@ -81,6 +83,9 @@
     <string name="menu_edit_mode_edit">编辑模式</string>
     <string name="menu_delete">删除</string>
     <string name="menu_commit">提交</string>
+    <string name="menu_negative_key">密码</string>
+    <string name="menu_negative_note">笔记</string>
+    <string name="menu_negative_explore">发现</string>
 
     <string name="dialog_password_import">请输入导入文件密码</string>
     <string name="dialog_password_export">设置导出数据包密码</string>
@@ -100,6 +105,15 @@
     <string name="settings_data_import_title">导入数据</string>
     <string name="settings_data_clear_summary">此操作将清除本地密码本的所有数据。</string>
     <string name="settings_data_clear_title">清除数据</string>
+    <string name="settings_ui_title">用户界面</string>
+    <string name="settings_ui_weak_password_hint_title">弱密码警告</string>
+    <string name="settings_ui_weak_password_hint_summary_on">当在密码本中保存弱密码时，显示警告。</string>
+    <string name="settings_ui_weak_password_hint_summary_off">当在密码本中保存弱密码时，不显示警告。</string>
+    <string name="settings_ui_weak_export_password_hint_title">数据包弱密码警告</string>
+    <string name="settings_ui_weak_export_password_hint_summary_on">当设置导出数据包密码为弱密码时，显示警告。</string>
+    <string name="settings_ui_weak_export_password_hint_summary_off">当设置导出数据包密码为弱密码时，不显示警告。</string>
+    <string name="settings_law_title">法律信息</string>
+    <string name="settings_law_open_source_title">开放源代码许可</string>
 
     <string name="processing_wipe_data">正在清除数据……</string>
     <string name="processing_alter_password">正在更新数据库……\n在更新完成前，请勿退出或关闭手机屏幕</string>
@@ -107,12 +121,24 @@
     <string name="processing_import">正在导入数据……</string>
     <string name="processing_export">正在导出数据……</string>
 
-    <string name="text_record_empty">没有记录，请点击右下角＋号添加新记录。</string>
+    <string name="text_data_empty">没有记录，请点击右下角＋号添加新记录。</string>
     <string name="text_title">标题</string>
     <string name="text_account">账号</string>
     <string name="text_password">密码</string>
     <string name="btn_copy_password">复制密码</string>
     <string name="text_detail">详细信息</string>
     <string name="file_data_export">密码本导出数据.zip</string>
+    <string name="text_password_length">密码长度：%1$d</string>
+    <string name="text_char_type">字符类型</string>
+    <string name="text_upper_letter">大写字母</string>
+    <string name="text_lower_letter">小写字母</string>
+    <string name="text_number">数字</string>
+    <string name="text_symbols">特殊符号</string>
+    <string name="btn_generate_again">重新生成</string>
+    <string name="btn_save_password">保存到密码本</string>
+
+    <string name="explore_password_generator">随机密码生成器</string>
+    <string name="explore_more">即将推出</string>
+    <string name="text_upgrade">正在更新数据</string>
 
 </resources>

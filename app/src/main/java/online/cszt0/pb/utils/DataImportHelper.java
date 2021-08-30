@@ -6,6 +6,9 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Pair;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,6 +20,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -27,15 +31,13 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import online.cszt0.pb.BuildConfig;
 import online.cszt0.pb.R;
+import online.cszt0.pb.bean.Note;
 import online.cszt0.pb.bean.PasswordRecord;
 
 public class DataImportHelper {
     private final Context context;
     private final File cacheFolder;
-
-    private String uuid;
-    private String verify;
-    private byte[] key;
+    private Provider provider;
 
     public DataImportHelper(Context context) {
         this.context = context;
@@ -74,36 +76,39 @@ public class DataImportHelper {
     public void parse() throws IOException, JSONException, UnsupportedVersionException {
         JSONObject manifest = new JSONObject(IOUtils.readFully(new File(cacheFolder, "manifest.json")));
         int dataVersion = manifest.getInt("data-version");
-        String checksum = manifest.getString("checksum");
 
-        if (dataVersion == 1) {
-            JSONObject keyinfo = new JSONObject((IOUtils.readFully(new File(cacheFolder, "keyinfo.json"))));
-            this.uuid = keyinfo.getString("uuid");
-            this.verify = keyinfo.getString("verify");
-
-            if (IOUtils.checkChecksum(new File(cacheFolder, "data.db"), checksum)) {
-                if (BuildConfig.DEBUG) {
-                    throw new IOException("Checksum fail");
-                }
-                throw new IOException();
-            }
-        } else {
+        provider = getProvider(dataVersion);
+        if (provider == null) {
             String platform = manifest.getString("platform");
             String versionName = manifest.getString("app-version-name");
             int versionCode = manifest.getInt("app-version-code");
             throw new UnsupportedVersionException(platform, versionName, versionCode, dataVersion);
         }
+        provider.cacheFolder = cacheFolder;
+        provider.parse(cacheFolder, manifest);
+    }
+
+    @Nullable
+    private Provider getProvider(int dataVersion) {
+        switch (dataVersion) {
+            case 1:
+                return new V1Provider();
+            case 2:
+                return new V2Provider();
+            default:
+                return null;
+        }
     }
 
     public void requestInputPassword(Runnable success, Runnable fail) {
         requirePasswordInput(null, key -> {
-            this.key = key;
+            provider.key = key;
             success.run();
         }, fail);
     }
 
-    public RecordReader getData() {
-        return new RecordIterator(key, new File(cacheFolder, "data.db"));
+    public Provider getProvider() {
+        return provider;
     }
 
     private void requirePasswordInput(String pwd, Consumer<byte[]> consumer, Runnable cancel) {
@@ -114,7 +119,7 @@ public class DataImportHelper {
                 .observeOn(Schedulers.io())
                 .map(p -> p.length() > 50 ? "" : p)
                 .map(Crypto::userInput2AesKey)
-                .map(password -> new Pair<>(password, PasswordUtils.checkPassword(password, uuid, verify)))
+                .map(password -> new Pair<>(password, provider.checkPassword(password)))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(pair -> {
                     if (pair.second) {
@@ -135,9 +140,10 @@ public class DataImportHelper {
 
     public void clean() {
         IOUtils.deleteFile(cacheFolder);
+        Optional.ofNullable(provider).ifPresent(Provider::close);
     }
 
-    public interface RecordReader extends Iterator<PasswordRecord>, AutoCloseable {
+    public interface BeanReader<Bean> extends Iterator<Bean>, AutoCloseable {
         @Override
         void close();
     }
@@ -172,17 +178,77 @@ public class DataImportHelper {
         }
     }
 
-    private static class RecordIterator implements RecordReader {
-        private final byte[] key;
-        private final SQLiteDatabase database;
+    /**
+     * 各版本数据包解析器接口
+     */
+    public abstract static class Provider {
+        private File cacheFolder;
+        private byte[] key;
+
+        protected abstract void parse(File cacheFolder, JSONObject manifest) throws IOException, JSONException;
+
+        protected abstract boolean checkPassword(byte[] key);
+
+        public BeanReader<PasswordRecord> openPasswordReader() {
+            return EmptyReader.getInstance();
+        }
+
+        public BeanReader<Note> openNoteReader() {
+            return EmptyReader.getInstance();
+        }
+
+        public void close() {
+        }
+
+        protected File getCacheFolder() {
+            return cacheFolder;
+        }
+
+        protected byte[] getKey() {
+            return key;
+        }
+    }
+
+    private static class EmptyReader<Bean> implements BeanReader<Bean> {
+
+        private static final EmptyReader<?> instance = new EmptyReader<>();
+
+        private EmptyReader() {
+        }
+
+        public static <T> EmptyReader<T> getInstance() {
+            //noinspection unchecked
+            return (EmptyReader<T>) instance;
+        }
+
+        @Override
+        public void close() {
+        }
+
+        @Override
+        public boolean hasNext() {
+            return false;
+        }
+
+        @Override
+        public Bean next() {
+            throw new NoSuchElementException();
+        }
+    }
+
+    private abstract static class WrapReader<Bean> implements BeanReader<Bean> {
         private final Cursor cursor;
         private boolean hasNext;
 
-        private RecordIterator(byte[] key, File file) {
-            this.key = key;
-            database = SQLiteDatabase.openDatabase(file.getAbsolutePath(), null, SQLiteDatabase.OPEN_READONLY);
-            cursor = database.rawQuery("select rowid, title, account, password, detail from book", new String[0]);
+        protected WrapReader(Cursor cursor) {
+            this.cursor = cursor;
             hasNext = cursor.moveToNext();
+        }
+
+
+        @Override
+        public void close() {
+            cursor.close();
         }
 
         @Override
@@ -191,25 +257,91 @@ public class DataImportHelper {
         }
 
         @Override
-        public PasswordRecord next() {
+        public Bean next() {
             if (!hasNext) {
                 throw new NoSuchElementException();
             }
-            PasswordRecord record = new PasswordRecord();
-            record.setRowid(cursor.getInt(0));
-            record.setTitle(Crypto.decryptStringData(Crypto.base64Decrypt(cursor.getString(1)), key));
-            record.setAccount(Crypto.decryptStringData(Crypto.base64Decrypt(cursor.getString(2)), key));
-            record.setPassword(Crypto.decryptStringData(Crypto.base64Decrypt(cursor.getString(3)), key));
-            record.setDetail(Crypto.decryptStringData(Crypto.base64Decrypt(cursor.getString(4)), key));
+            Bean bean = readBean(cursor);
             hasNext = cursor.moveToNext();
-            return record;
+            return bean;
+        }
+
+        @NonNull
+        protected abstract Bean readBean(Cursor cursor);
+    }
+
+    private static class V1Provider extends Provider {
+        private String uuid;
+        private String verify;
+        private SQLiteDatabase database;
+
+        @Override
+        public void parse(File cacheFolder, JSONObject manifest) throws IOException, JSONException {
+            String checksum = manifest.getString("checksum");
+
+            JSONObject keyinfo = new JSONObject((IOUtils.readFully(new File(cacheFolder, "keyinfo.json"))));
+            this.uuid = keyinfo.getString("uuid");
+            this.verify = keyinfo.getString("verify");
+
+            if (IOUtils.checkChecksum(new File(cacheFolder, "data.db"), checksum)) {
+                if (BuildConfig.DEBUG) {
+                    throw new IOException("Checksum fail");
+                }
+                throw new IOException();
+            }
+        }
+
+        @Override
+        public boolean checkPassword(byte[] key) {
+            return PasswordUtils.checkPassword(key, uuid, verify);
+        }
+
+        @Override
+        public BeanReader<PasswordRecord> openPasswordReader() {
+            SQLiteDatabase database = openDatabase();
+            return new WrapReader<PasswordRecord>(database.rawQuery("select rowid, title, account, password, detail from book", new String[0])) {
+                @NonNull
+                @Override
+                protected PasswordRecord readBean(Cursor cursor) {
+                    PasswordRecord passwordRecord = new PasswordRecord();
+                    passwordRecord.setRowid(cursor.getInt(0));
+                    passwordRecord.setTitle(Crypto.decryptData(cursor.getString(1), getKey()));
+                    passwordRecord.setAccount(Crypto.decryptData(cursor.getString(2), getKey()));
+                    passwordRecord.setPassword(Crypto.decryptData(cursor.getString(3), getKey()));
+                    passwordRecord.setDetail(Crypto.decryptData(cursor.getString(4), getKey()));
+                    return passwordRecord;
+                }
+            };
+        }
+
+        protected SQLiteDatabase openDatabase() {
+            if (database == null) {
+                database = SQLiteDatabase.openDatabase(new File(getCacheFolder(), "data.db").getAbsolutePath(), null, SQLiteDatabase.OPEN_READONLY);
+            }
+            return database;
         }
 
         @Override
         public void close() {
-            cursor.close();
             database.close();
-            hasNext = false;
+        }
+    }
+
+    private static class V2Provider extends V1Provider {
+        @Override
+        public BeanReader<Note> openNoteReader() {
+            SQLiteDatabase database = openDatabase();
+            return new WrapReader<Note>(database.rawQuery("select rowid, title, content from notes", new String[0])) {
+                @NonNull
+                @Override
+                protected Note readBean(Cursor cursor) {
+                    Note note = new Note();
+                    note.setRowid(cursor.getInt(0));
+                    note.setTitle(Crypto.decryptData(cursor.getString(1), getKey()));
+                    note.setContent(Crypto.decryptData(cursor.getString(2), getKey()));
+                    return note;
+                }
+            };
         }
     }
 }

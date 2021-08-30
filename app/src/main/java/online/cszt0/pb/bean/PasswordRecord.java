@@ -3,7 +3,7 @@ package online.cszt0.pb.bean;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class PasswordRecord implements Parcelable {
+public class PasswordRecord implements SQLiteBean, Parcelable {
     private int rowid;
     private String title;
     private String account;

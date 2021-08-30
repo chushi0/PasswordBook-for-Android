@@ -11,6 +11,14 @@ public class Crypto {
         System.loadLibrary("crypto");
     }
 
+    public static String decryptData(String message, byte[] key) {
+        return decryptStringData(base64Decrypt(message), key);
+    }
+
+    public static String encryptData(String message, byte[] key) {
+        return base64Encrypt(encryptStringData(message, key));
+    }
+
     /**
      * 使用密钥加密数据
      *

@@ -1,8 +1,11 @@
 package online.cszt0.pb.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Pair;
+
+import androidx.preference.PreferenceManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -24,7 +27,7 @@ import online.cszt0.pb.BuildConfig;
 import online.cszt0.pb.R;
 
 public class DataExportHelper {
-    private static final int DATA_VERSION = 1;
+    private static final int DATA_VERSION = 2;
 
     private final Context context;
     private final FileDescriptor fileDescriptor;
@@ -42,6 +45,12 @@ public class DataExportHelper {
                 emitter.onNext(t);
                 emitter.onComplete();
             }, cancel -> emitter.onError(new NoPasswordException()));
+
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+            if (!preferences.getBoolean("ui_weak_export_password_hint", true)) {
+                dialog.setCheckSafePassword(false);
+            }
+
             dialog.setTitle(R.string.dialog_password_export);
             dialog.show();
         });

@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1024" height="1024" viewBox="0 0 1024 1024">
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 512 512">
   <metadata><?xpacket begin="﻿" id="W5M0MpCehiHzreSzNTczkc9d"?>
 <x:xmpmeta xmlns:x="adobe:ns:meta/" x:xmptk="Adobe XMP Core 5.6-c138 79.159824, 2016/09/14-01:09:01        ">
    <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
@@ -27,5 +27,20 @@
                                                                                                     
                            
 <?xpacket end="w"?></metadata>
-<image id="图层_1" data-name="图层 1" width="1024" height="1024" xlink:href="data:img/png;base64,iVBORw0KGgoAAAANSUhEUgAABAAAAAQAAQMAAABF07nAAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAABlBMVEUzmf8AAAAlmo9cAAAAAWJLR0QB/wIt3gAAAAlwSFlzAAASdAAAEnQB3mYfeAAAAAd0SU1FB+UIGg0mOoiDFW4AAACWSURBVHja7cEBAQAAAIIg/69uSEABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAO8GBB4AAQ3eOGQAAAAASUVORK5CYII="/>
+<defs>
+    <style>
+      .cls-1, .cls-2 {
+        fill: #39f;
+        stroke: #39f;
+        stroke-width: 0.817px;
+      }
+
+      .cls-1 {
+        fill-rule: evenodd;
+      }
+    </style>
+  </defs>
+  <path id="形状_1" data-name="形状 1" class="cls-1" d="M293.808,326V196.475h35.2L261,79,192.993,196.475h35.2V326h65.615Z"/>
+  <path id="矩形_1" data-name="矩形 1" class="cls-1" d="M64,236h46V415H64V236Zm348,0h46V415H412V236Z"/>
+  <rect id="矩形_2" data-name="矩形 2" class="cls-2" x="64" y="367" width="394" height="49"/>
 </svg>

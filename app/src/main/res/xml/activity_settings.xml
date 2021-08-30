@@ -1,4 +1,5 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory app:title="@string/settings_secure_title">
 
@@ -42,5 +43,33 @@
             app:summary="@string/settings_data_clear_summary"
             app:title="@string/settings_data_clear_title" />
 
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/settings_ui_title">
+        <SwitchPreference
+            app:defaultValue="true"
+            app:icon="@drawable/ic_baseline_warning_24"
+            app:key="ui_weak_password_hint"
+            app:summaryOff="@string/settings_ui_weak_password_hint_summary_off"
+            app:summaryOn="@string/settings_ui_weak_password_hint_summary_on"
+            app:title="@string/settings_ui_weak_password_hint_title" />
+
+        <SwitchPreference
+            app:defaultValue="true"
+            app:key="ui_weak_export_password_hint"
+            app:summaryOff="@string/settings_ui_weak_export_password_hint_summary_off"
+            app:summaryOn="@string/settings_ui_weak_export_password_hint_summary_on"
+            app:title="@string/settings_ui_weak_export_password_hint_title" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/settings_law_title">
+        <Preference
+            app:key="law_open_source"
+            app:title="@string/settings_law_open_source_title">
+            <intent
+                android:targetClass="online.cszt0.pb.ui.BuiltInWebActivity"
+                android:targetPackage="online.cszt0.pb"
+                android:data="file:///android_asset/license.html"/>
+        </Preference>
     </PreferenceCategory>
 </PreferenceScreen>

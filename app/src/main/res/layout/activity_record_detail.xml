@@ -29,7 +29,10 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/text_title"
                 android:inputType="text"
-                android:maxLines="1" />
+                android:maxLines="1">
+
+                <requestFocus />
+            </com.google.android.material.textfield.TextInputEditText>
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout

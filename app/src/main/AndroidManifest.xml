@@ -6,11 +6,12 @@
         android:name=".PBApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.PB">
         <activity android:name=".ui.SettingsActivity" />
+        <activity android:name=".ui.UpgradeActivity" android:launchMode="singleTask" />
         <activity
             android:name=".ui.MainActivity"
             android:launchMode="singleTask">
@@ -24,6 +25,11 @@
             android:name=".ui.HelloActivity"
             android:launchMode="singleTask" />
         <activity android:name=".ui.RecordDetailActivity" />
+        <activity android:name=".ui.NoteDetailActivity" />
+        <activity
+            android:name=".ui.BuiltInWebActivity"
+            android:launchMode="singleTask" />
+        <activity android:name=".ui.RandomPasswordActivity" />
     </application>
 
 </manifest>
