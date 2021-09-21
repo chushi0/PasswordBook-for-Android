@@ -1,23 +1,50 @@
 package online.cszt0.pb.utils;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.SystemClock;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
 import android.util.Log;
 import android.util.Pair;
 
+import androidx.biometric.BiometricPrompt;
+
+import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.IvParameterSpec;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import online.cszt0.pb.BuildConfig;
+import online.cszt0.pb.R;
 import online.cszt0.pb.bean.Note;
 import online.cszt0.pb.bean.PasswordRecord;
-import online.cszt0.pb.ui.UpgradeActivity;
 
 public class Database {
     private static final int VERSION = 2;
+
+    private static final String KEY_NAME = "main-password";
 
     private Database() {
     }
@@ -43,6 +70,105 @@ public class Database {
         String uuid = preferences.getString("uuid", null);
         String verify = preferences.getString("verify", null);
         return PasswordUtils.checkPassword(key, uuid, verify);
+    }
+
+    public static boolean checkBiometricOpen(Context context) {
+        SharedPreferences preferences = context.getSharedPreferences("config", Context.MODE_PRIVATE);
+        return preferences.getBoolean("biometric-enable", false);
+    }
+
+    @SuppressLint("CheckResult")
+    public static void enableBiometricPassword(Context context, Runnable onSuccess, Consumer<Throwable> onFail) {
+        //noinspection ResultOfMethodCallIgnored
+        MainPassword.getInstance().userKeyObservable(context)
+                .observeOn(Schedulers.io())
+                .doOnNext(key -> generateSecretKey(new KeyGenParameterSpec.Builder(
+                        KEY_NAME,
+                        KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                        .setBlockModes(KeyProperties.BLOCK_MODE_CBC)
+                        .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
+                        .setUserAuthenticationRequired(true)
+                        .setInvalidatedByBiometricEnrollment(true)
+                        .setRandomizedEncryptionRequired(false)
+                        .build()))
+                .map(k -> {
+                    Cipher cipher = getCipher();
+                    SecretKey secretKey = getSecretKey();
+                    cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+                    return new Pair<>(k, new BiometricPrompt.CryptoObject(cipher));
+                })
+                .flatMap(pair -> BiometricUtils.authenticateObservableSource(context, context.getString(R.string.text_biometric_enable_title), context.getString(R.string.text_biometric_enable_subtitle), pair.second, cryptoObject -> new Pair<>(pair.first, cryptoObject)))
+                .map(pair -> new Pair<>(pair.first, pair.second.getCipher()))
+                .doOnNext(pair -> {
+                    byte[] encryptKey = pair.second.doFinal(pair.first);
+                    byte[] iv = pair.second.getIV();
+                    String strEncKey = Crypto.base64Encrypt(encryptKey);
+                    String strIv = Crypto.base64Encrypt(iv);
+                    SharedPreferences preferences = context.getSharedPreferences("config", Context.MODE_PRIVATE);
+                    preferences.edit()
+                            .putBoolean("biometric-enable", true)
+                            .putString("biometric-key", strEncKey)
+                            .putString("biometric-iv", strIv)
+                            .apply();
+                })
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(cipherPair -> onSuccess.run(), onFail::accept);
+    }
+
+    public static void disableBiometricPassword(Context context) {
+        SharedPreferences preferences = context.getSharedPreferences("config", Context.MODE_PRIVATE);
+        preferences.edit()
+                .putBoolean("biometric-enable", false)
+                .remove("biometric-key")
+                .remove("biometric-iv")
+                .apply();
+
+        try {
+            KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+            keyStore.load(null);
+            keyStore.deleteEntry(KEY_NAME);
+        } catch (KeyStoreException | CertificateException | IOException | NoSuchAlgorithmException e) {
+            if (BuildConfig.DEBUG) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static BiometricPrompt.CryptoObject getCryptoObject(Context context) throws NoSuchAlgorithmException, NoSuchPaddingException, UnrecoverableKeyException, CertificateException, KeyStoreException, IOException, InvalidKeyException, InvalidAlgorithmParameterException {
+        SharedPreferences preferences = context.getSharedPreferences("config", Context.MODE_PRIVATE);
+        String strIv = preferences.getString("biometric-iv", null);
+        Cipher cipher = getCipher();
+        byte[] iv = Crypto.base64Decrypt(strIv);
+        SecretKey secretKey = getSecretKey();
+        cipher.init(Cipher.DECRYPT_MODE, secretKey, new IvParameterSpec(iv));
+        return new BiometricPrompt.CryptoObject(cipher);
+    }
+
+    public static byte[] decodeBiometricPassword(Context context, BiometricPrompt.CryptoObject cryptoObject) throws BadPaddingException, IllegalBlockSizeException {
+        SharedPreferences preferences = context.getSharedPreferences("config", Context.MODE_PRIVATE);
+        String strEncKey = preferences.getString("biometric-key", null);
+        byte[] encryptKey = Crypto.base64Decrypt(strEncKey);
+        Cipher cipher = cryptoObject.getCipher();
+        return cipher.doFinal(encryptKey);
+    }
+
+    private static void generateSecretKey(KeyGenParameterSpec keyGenParameterSpec) throws NoSuchProviderException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(
+                KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
+        keyGenerator.init(keyGenParameterSpec);
+        keyGenerator.generateKey();
+    }
+
+    private static SecretKey getSecretKey() throws KeyStoreException, CertificateException, NoSuchAlgorithmException, IOException, UnrecoverableKeyException {
+        KeyStore keyStore = KeyStore.getInstance("AndroidKeyStore");
+        keyStore.load(null);
+        return ((SecretKey) keyStore.getKey(KEY_NAME, null));
+    }
+
+    private static Cipher getCipher() throws NoSuchPaddingException, NoSuchAlgorithmException {
+        return Cipher.getInstance(KeyProperties.KEY_ALGORITHM_AES + "/"
+                + KeyProperties.BLOCK_MODE_CBC + "/"
+                + KeyProperties.ENCRYPTION_PADDING_PKCS7);
     }
 
     private static SQLiteDatabase openDatabase(Context context) {
@@ -294,6 +420,9 @@ public class Database {
     }
 
     public static void wipeAll(Context context) {
+        if (checkBiometricOpen(context)) {
+            disableBiometricPassword(context);
+        }
         SQLiteDatabase.deleteDatabase(context.getDatabasePath("pb.db"));
         SharedPreferences preferences = context.getSharedPreferences("config", Context.MODE_PRIVATE);
         preferences.edit().clear().apply();

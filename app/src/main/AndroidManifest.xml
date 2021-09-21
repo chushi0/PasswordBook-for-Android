@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="online.cszt0.pb">
 
+    <!--suppress DeprecatedClassUsageInspection -->
+    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+
     <application
         android:name=".PBApplication"
         android:allowBackup="true"
@@ -11,7 +15,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PB">
         <activity android:name=".ui.SettingsActivity" />
-        <activity android:name=".ui.UpgradeActivity" android:launchMode="singleTask" />
+        <activity
+            android:name=".ui.UpgradeActivity"
+            android:launchMode="singleTask" />
         <activity
             android:name=".ui.MainActivity"
             android:launchMode="singleTask">

@@ -6,17 +6,36 @@ import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
 import android.util.Pair;
 
+import androidx.biometric.BiometricPrompt;
 import androidx.preference.PreferenceManager;
 
+import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.util.Base64;
 import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
+import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import online.cszt0.pb.BuildConfig;
@@ -187,9 +206,9 @@ public final class MainPassword {
                 .subscribe(key -> emitter.onNext(emit.apply(key)), emitter::onError, emitter::onComplete));
     }
 
+    @SuppressLint("CheckResult")
     private void requirePasswordInput(Context context, String pwd, Consumer<byte[]> consumer, Runnable cancel) {
         //noinspection ResultOfMethodCallIgnored
-        @SuppressLint("CheckResult")
         PasswordDialog dialog = PasswordDialog.create(context, inputPwd -> Observable.just(inputPwd)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
@@ -210,6 +229,31 @@ public final class MainPassword {
                 }), dialog1 -> cancel.run());
         dialog.setTitle(R.string.dialog_password_main_input);
         dialog.setCheckSafePassword(false);
+        try {
+            if (Database.checkBiometricOpen(context)) {
+                dialog.setSupportBiometric(context.getString(R.string.text_biometric_password), null, Database.getCryptoObject(context), cryptoObject -> {
+                    //noinspection ResultOfMethodCallIgnored
+                    Observable.just(cryptoObject)
+                            .observeOn(Schedulers.io())
+                            .map(cryptoObject1 -> Database.decodeBiometricPassword(context, cryptoObject))
+                            .map(password -> new Pair<>(password, Database.checkPassword(context, password)))
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(pair -> {
+                                if (!pair.second) {
+                                    Message message = handler.obtainMessage(WHAT_USE_KEY_INPUT_PASSWORD);
+                                    message.obj = new UseKeyParam(context, consumer, cancel, pwd);
+                                    message.sendToTarget();
+                                } else {
+                                    byte[] key = pair.first;
+                                    setUserKey(key);
+                                    consumer.accept(key);
+                                }
+                            });
+                });
+            }
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | UnrecoverableKeyException | CertificateException | KeyStoreException | IOException | InvalidKeyException | InvalidAlgorithmParameterException e) {
+            e.printStackTrace();
+        }
         if (pwd != null) {
             dialog.setInitPassword(pwd);
             dialog.setPasswordVisible(true);

@@ -1,5 +1,5 @@
-<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <PreferenceCategory app:title="@string/settings_secure_title">
 
@@ -21,6 +21,12 @@
             app:key="secure_alter_password"
             app:summary="@string/settings_secure_alter_password_summary"
             app:title="@string/settings_secure_alter_password_title" />
+
+        <SwitchPreference
+            app:icon="@drawable/ic_baseline_fingerprint_36"
+            app:key="secure_biometric"
+            app:summary="@string/settings_secure_biometric_summary"
+            app:title="@string/settings_secure_biometric_title" />
 
     </PreferenceCategory>
 
@@ -67,9 +73,9 @@
             app:key="law_open_source"
             app:title="@string/settings_law_open_source_title">
             <intent
+                android:data="file:///android_asset/license.html"
                 android:targetClass="online.cszt0.pb.ui.BuiltInWebActivity"
-                android:targetPackage="online.cszt0.pb"
-                android:data="file:///android_asset/license.html"/>
+                android:targetPackage="online.cszt0.pb" />
         </Preference>
     </PreferenceCategory>
 </PreferenceScreen>

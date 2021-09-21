@@ -3,6 +3,7 @@ package online.cszt0.pb.ui;
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
@@ -23,6 +24,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceManager;
+import androidx.preference.SwitchPreference;
 
 import org.json.JSONException;
 
@@ -36,6 +39,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import online.cszt0.pb.BuildConfig;
 import online.cszt0.pb.R;
+import online.cszt0.pb.utils.BiometricUtils;
 import online.cszt0.pb.utils.Crypto;
 import online.cszt0.pb.utils.DataExportHelper;
 import online.cszt0.pb.utils.DataImportHelper;
@@ -88,9 +92,16 @@ public class SettingsActivity extends AppCompatActivity {
     public static class SettingsFragment extends PreferenceFragmentCompat {
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+            SharedPreferences configPreferences = getContext().getSharedPreferences("config", MODE_PRIVATE);
+            preferences.edit()
+                    .putBoolean("secure_biometric", configPreferences.getBoolean("biometric-enable", false))
+                    .apply();
+
             setPreferencesFromResource(R.xml.activity_settings, rootKey);
         }
 
+        @SuppressLint("CheckResult")
         @Override
         public boolean onPreferenceTreeClick(Preference preference) {
             switch (preference.getKey()) {
@@ -107,6 +118,46 @@ public class SettingsActivity extends AppCompatActivity {
                     PasswordDialog passwordDialog = PasswordDialog.create(getContext(), this::alterPassword, null);
                     passwordDialog.setTitle(R.string.dialog_alter_password_title);
                     passwordDialog.show();
+                    break;
+                }
+                case "secure_biometric": {
+                    boolean isChecked = ((SwitchPreference) preference).isChecked();
+                    boolean isEnable = Database.checkBiometricOpen(getContext());
+                    if (isEnable && !isChecked) {
+                        MainPassword.getInstance().forceInputPassword(getContext())
+                                .observeOn(Schedulers.io())
+                                .doOnNext(k -> Database.disableBiometricPassword(getContext()))
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(n -> {
+                                }, e -> {
+                                    if (BuildConfig.DEBUG) {
+                                        e.printStackTrace();
+                                    }
+                                    String cause;
+
+                                    if (e instanceof MainPassword.NoUserKeyException) {
+                                        cause = getString(R.string.fail_no_main_password);
+                                    } else {
+                                        cause = getString(R.string.fail_unknown);
+                                    }
+                                    Toast.makeText(getContext(), getString(R.string.toast_activity_settings_disable_biometric_fail, cause), Toast.LENGTH_SHORT).show();
+                                    ((SwitchPreference) preference).setChecked(true);
+                                });
+                    } else if (!isEnable && isChecked) {
+                        Database.enableBiometricPassword(getContext(), () -> {
+                        }, e -> {
+                            String cause;
+                            if (e instanceof MainPassword.NoUserKeyException) {
+                                cause = getString(R.string.fail_no_main_password);
+                            } else if (e instanceof BiometricUtils.BiometricFailException) {
+                                cause = getString(R.string.fail_biometric, ((BiometricUtils.BiometricFailException) e).getErrString());
+                            } else {
+                                cause = getString(R.string.fail_unknown);
+                            }
+                            Toast.makeText(getContext(), getString(R.string.toast_activity_settings_enable_biometric_fail, cause), Toast.LENGTH_SHORT).show();
+                            ((SwitchPreference) preference).setChecked(false);
+                        });
+                    }
                     break;
                 }
                 case "data_export": {
@@ -200,7 +251,14 @@ public class SettingsActivity extends AppCompatActivity {
                         handler.removeCallbacksAndMessages(null);
                         dialog.dismiss();
                         MainPassword.getInstance().setUserKey(key);
-                        Toast.makeText(getContext(), R.string.toast_activity_settings_password_altered, Toast.LENGTH_SHORT).show();
+                        if (Database.checkBiometricOpen(getContext())) {
+                            Database.disableBiometricPassword(getContext());
+                            SwitchPreference switchPreference = findPreference("secure_biometric");
+                            switchPreference.setChecked(false);
+                            Toast.makeText(getContext(), getString(R.string.toast_activity_settings_password_altered_biometric), Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(getContext(), R.string.toast_activity_settings_password_altered, Toast.LENGTH_SHORT).show();
+                        }
                     }, e -> {
                         if (BuildConfig.DEBUG) {
                             e.printStackTrace();
