@@ -36,6 +36,7 @@ public class PasswordDialog extends AlertDialog {
 
     private String biometricTitle;
     private String biometricSubtitle;
+    private boolean biometricPrefer;
 
     private PasswordDialog(@NonNull Context context) {
         super(context);
@@ -69,10 +70,11 @@ public class PasswordDialog extends AlertDialog {
         this.checkSafePassword = checkSafePassword;
     }
 
-    public void setSupportBiometric(String title, String subtitle, BiometricPrompt.CryptoObject cryptoObject, BiometricPasswordListener listener) {
+    public void setSupportBiometric(String title, String subtitle, BiometricPrompt.CryptoObject cryptoObject, boolean biometricPrefer, BiometricPasswordListener listener) {
         this.biometricTitle = title;
         this.biometricSubtitle = subtitle;
         this.cryptoObject = cryptoObject;
+        this.biometricPrefer = biometricPrefer;
         this.biometricPasswordListener = listener;
     }
 
@@ -106,7 +108,7 @@ public class PasswordDialog extends AlertDialog {
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_SECURE);
         setOnCancelListener(cancelListener);
 
-        if (useBiometric) {
+        if (useBiometric && biometricPrefer) {
             onBiometric(null);
         }
     }

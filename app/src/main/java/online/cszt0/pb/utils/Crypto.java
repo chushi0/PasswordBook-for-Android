@@ -8,7 +8,7 @@ import java.util.Arrays;
 
 public class Crypto {
     static {
-        System.loadLibrary("crypto");
+        System.loadLibrary("native-crypto");
     }
 
     public static String decryptData(String message, byte[] key) {
@@ -89,6 +89,7 @@ public class Crypto {
      * @param key       用于输出 256 位密钥，务必保证长度为 32
      */
     private static native void key(@NonNull byte[] userInput, @NonNull byte[] key);
+    private static native void key_legacy(@NonNull byte[] userInput, @NonNull byte[] key);
 
     /**
      * 使用 AES-256 算法加密数据
@@ -99,6 +100,7 @@ public class Crypto {
      * @return 密文所需空间。若密文所需空间不足，则不进行加密操作
      */
     private static native int encrypt(@NonNull byte[] key, @NonNull byte[] plain, @NonNull byte[] data);
+    private static native int encrypt_legacy(@NonNull byte[] key, @NonNull byte[] plain, @NonNull byte[] data);
 
     /**
      * 使用 AES-256 算法解密数据
@@ -109,6 +111,7 @@ public class Crypto {
      * @return 明文长度。若明文所需空间不足，则不进行解密操作
      */
     private static native int decrypt(@NonNull byte[] key, @NonNull byte[] plain, @NonNull byte[] data);
+    private static native int decrypt_legacy(@NonNull byte[] key, @NonNull byte[] plain, @NonNull byte[] data);
 
     /**
      * 使用 Base64 编码
