@@ -152,5 +152,6 @@
     <string name="explore_password_generator">随机密码生成器</string>
     <string name="explore_more">即将推出</string>
     <string name="text_upgrade">正在更新数据</string>
+    <string name="text_search_text">搜索</string>
 
 </resources>

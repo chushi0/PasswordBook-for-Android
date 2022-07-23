@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,6 +30,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.Arrays;
 import java.util.List;
@@ -35,6 +38,7 @@ import java.util.Objects;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import online.cszt0.androidcommonutils.view.CommonAdapterInterface;
 import online.cszt0.androidcommonutils.view.CommonRecyclerViewAdapter;
 import online.cszt0.androidcommonutils.view.ViewHolder;
 import online.cszt0.pb.BuildConfig;
@@ -205,6 +209,7 @@ public class MainActivity extends AppCompatActivity {
         protected static final int REQUEST_DETAIL = 1;
 
         private SwipeRefreshLayout swipeRefreshLayout;
+        private TextInputEditText searchView;
         private RecyclerView recyclerView;
         private CommonRecyclerViewAdapter<Data> recyclerViewAdapter;
         private View emptyView;
@@ -215,6 +220,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
             View inflate = inflater.inflate(R.layout.fragment_main_datalist, container, false);
+            searchView = inflate.findViewById(R.id.search);
             swipeRefreshLayout = inflate.findViewById(R.id.swipe);
             recyclerView = inflate.findViewById(R.id.recycler_view);
             emptyView = inflate.findViewById(R.id.empty);
@@ -223,6 +229,26 @@ public class MainActivity extends AppCompatActivity {
             recyclerViewAdapter = initRecyclerViewAdapter();
             recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
             recyclerView.setAdapter(recyclerViewAdapter);
+
+            if (isSupportFilter()) {
+                searchView.addTextChangedListener(new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable s) {
+                        if (recyclerViewAdapter != null) {
+                            recyclerViewAdapter.getFilter().filter(s);
+                        }
+                    }
+                });
+            }
+
             return inflate;
         }
 
@@ -246,8 +272,12 @@ public class MainActivity extends AppCompatActivity {
                         swipeRefreshLayout.setRefreshing(false);
                         if (recyclerViewAdapter.getItemCount() == 0) {
                             emptyView.setVisibility(View.VISIBLE);
+                            searchView.setVisibility(View.GONE);
                         } else {
                             emptyView.setVisibility(View.GONE);
+                            if (isSupportFilter()) {
+                                searchView.setVisibility(View.VISIBLE);
+                            }
                         }
                         String cause = getCause(e);
                         Toast.makeText(getContext(), getString(R.string.toast_activity_main_load_fail, cause), Toast.LENGTH_SHORT).show();
@@ -259,8 +289,13 @@ public class MainActivity extends AppCompatActivity {
             recyclerViewAdapter.resetDataSet(data);
             if (data.isEmpty()) {
                 emptyView.setVisibility(View.VISIBLE);
+                searchView.setVisibility(View.GONE);
             } else {
                 emptyView.setVisibility(View.GONE);
+                if (isSupportFilter()) {
+                    searchView.setVisibility(View.VISIBLE);
+                    recyclerViewAdapter.getFilter().filter(searchView.getText());
+                }
             }
             recyclerView.post(() -> recyclerView.scrollTo(0, 0));
         }
@@ -298,6 +333,10 @@ public class MainActivity extends AppCompatActivity {
                 loadDatabase();
             }
         }
+
+        protected boolean isSupportFilter() {
+            return false;
+        }
     }
 
     public static class KeyFragment extends DataFragment<PasswordRecord> {
@@ -323,6 +362,11 @@ public class MainActivity extends AppCompatActivity {
             intent.setAction(AbstractDetailActivity.ACTION_MODIFY);
             intent.putExtra(AbstractDetailActivity.EXTRA_KEY_DATA, record);
             startActivityForResult(intent, REQUEST_DETAIL);
+        }
+
+        @Override
+        protected boolean isSupportFilter() {
+            return true;
         }
     }
 

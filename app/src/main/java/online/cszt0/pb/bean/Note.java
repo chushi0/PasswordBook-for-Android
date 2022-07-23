@@ -3,7 +3,10 @@ package online.cszt0.pb.bean;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class Note implements SQLiteBean, Parcelable {
+import online.cszt0.androidcommonutils.view.CommonAdapterInterface;
+import online.cszt0.pb.utils.FilterUtils;
+
+public class Note implements SQLiteBean, Parcelable, CommonAdapterInterface.Filterable {
     private static final int TITLE_MAX_LENGTH = 50;
 
     private int rowid;
@@ -73,5 +76,10 @@ public class Note implements SQLiteBean, Parcelable {
         } else {
             title = content.substring(0, TITLE_MAX_LENGTH);
         }
+    }
+
+    @Override
+    public boolean filter(CharSequence constraint) {
+        return FilterUtils.containsKeyword(constraint.toString(), title, content);
     }
 }

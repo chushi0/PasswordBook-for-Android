@@ -2,8 +2,12 @@ package online.cszt0.pb.bean;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 
-public class PasswordRecord implements SQLiteBean, Parcelable {
+import online.cszt0.androidcommonutils.view.CommonAdapterInterface;
+import online.cszt0.pb.utils.FilterUtils;
+
+public class PasswordRecord implements SQLiteBean, Parcelable, CommonAdapterInterface.Filterable {
     private int rowid;
     private String title;
     private String account;
@@ -85,5 +89,10 @@ public class PasswordRecord implements SQLiteBean, Parcelable {
         dest.writeString(account);
         dest.writeString(password);
         dest.writeString(detail);
+    }
+
+    @Override
+    public boolean filter(CharSequence constraint) {
+        return FilterUtils.containsKeyword(constraint.toString(), title, detail);
     }
 }
